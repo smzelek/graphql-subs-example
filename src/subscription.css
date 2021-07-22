@@ -1,0 +1,10 @@
+
+.queries {
+    display: flex;
+    flex-direction: row;
+}
+.block {
+    padding: 20px;
+    border: 1px solid black;
+    margin: 20px
+}
