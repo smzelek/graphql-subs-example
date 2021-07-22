@@ -12,19 +12,14 @@ const SAMPLE_QUERY = gql`
 `;
 
 const SAMPLE_SUBSCRIPTION = gql`
-  subscription CountSeconds($startFrom: Int!, $upTo: Int!) {
-    countSeconds(startFrom: $startFrom, upTo: $upTo) {
-      time
-      serverName
-    }
+  subscription BuildLog {
+    buildLog
   }
 `;
 
 function Subscription({ id }) {
-  const subscription = useSubscription(SAMPLE_SUBSCRIPTION, {
-    variables: { startFrom: id, upTo: 100 },
-  });
-
+  const subscription = useSubscription(SAMPLE_SUBSCRIPTION);
+    console.log(subscription)
   return (
     <div className="block">
       <h3>Subscription {id} </h3>

@@ -1,15 +1,21 @@
 import graphene
 import os
 from rx import Observable
-import random
-
+from redisclient import asyncredis
+import asyncio
+from flask import abort
 
 class SampleQuery(graphene.ObjectType):
-    result = graphene.Int()
+    result = graphene.String()
     server_name = graphene.String()
 
-    def resolve_result(self, info):
-        return random.randint(1,101)
+    async def resolve_result(self, info):
+        try:
+            [channel] = await asyncio.wait_for(asyncredis.subscribe('job:1'), timeout=10)
+        except asyncio.TimeoutError:
+            abort(500, "Request timed out.")
+        a = await channel.get()
+        return a
 
     def resolve_server_name(self, info):
         return os.environ.get('SERVER_NAME', 'default')
@@ -22,24 +28,23 @@ class Query(graphene.ObjectType):
 
 
 class StatefulSecondsCounter(graphene.ObjectType):
-    time = graphene.Int()
     server_name = graphene.String()
-
-    def __init__(self, time):
-        self.time = time
-    
-    def resolve_time(self, info):
-        return self.time
+    time = graphene.Int()
 
     def resolve_server_name(self, info):
         return os.environ.get('SERVER_NAME', 'default')
 
 class Subscription(graphene.ObjectType):
-    count_seconds = graphene.Field(StatefulSecondsCounter, start_from=graphene.Int(), up_to=graphene.Int())
+    build_log = graphene.Int()
 
-    def resolve_count_seconds(root, info, start_from=0, up_to=5):
-        return Observable.interval(1000)\
-            .take_while(lambda i: int(i) + start_from <= up_to)\
-            .map(lambda i: StatefulSecondsCounter(i + start_from))
+    # def resolve_build_log(root, info, app_id, job_id):
+    #     return Observable.just(StatefulSecondsCounter())
+
+    async def resolve_build_log(self, info):
+        yield 0
+        for i in range(10):
+            yield i
+            await asyncio.sleep(1.)
+        yield 10
 
 schema = graphene.Schema(query=Query,  subscription=Subscription)

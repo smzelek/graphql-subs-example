@@ -1,3 +1,4 @@
+# pip-compile -o requirements.txt requirements.in && pip3 install -r requirements.txt
 graphene
 flask-graphql
 gevent
@@ -6,3 +7,5 @@ graphql-ws
 werkzeug==1.0.1
 flask==1.1.2
 flask-cors
+aioredis
+redis

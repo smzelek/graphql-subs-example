@@ -6,6 +6,9 @@ from graphql_ws.gevent import  GeventSubscriptionServer
 from flask_cors import CORS
 import os
 from schema import schema
+from redisclient import syncredis
+from graphql.execution.executors.asyncio import AsyncioExecutor
+import asyncio
 
 class GraphQLCustomCoreBackend(GraphQLCoreBackend):
     def __init__(self, executor=None):
@@ -19,23 +22,17 @@ PORT = int(os.environ.get('SERVER_PORT'))
 app.debug = True
 app.add_url_rule('/graphql', view_func=GraphQLView.as_view('graphql', schema=schema, backend=GraphQLCustomCoreBackend(), graphiql=True))
 
-
 sockets = Sockets(app)
 subscription_server = GeventSubscriptionServer(schema)
 app.app_protocol = lambda environ_path_info: 'graphql-ws'
-
 
 @sockets.route('/subscriptions')
 def echo_socket(ws):
     subscription_server.handle(ws)
     return []
 
-
-if __name__ == "__main__":
-    from gevent import pywsgi
-    from geventwebsocket.handler import WebSocketHandler
-    print("Server running")
-    server = pywsgi.WSGIServer(('', PORT), app, handler_class=WebSocketHandler)
-    server.serve_forever()
-
-    
+@app.route('/increment/<id>')
+def increment(id):
+    print('doing asyncinc')
+    syncredis.publish('job:{id}'.format(id=id), 'Hello World {0}'.format(id))
+    return "OK"

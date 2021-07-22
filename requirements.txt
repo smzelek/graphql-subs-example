@@ -4,8 +4,12 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.in
 #
+aioredis==1.3.1
+    # via -r requirements.in
 aniso8601==7.0.0
     # via graphene
+async-timeout==3.0.1
+    # via aioredis
 click==8.0.1
     # via flask
 flask==1.1.2
@@ -44,6 +48,8 @@ graphql-ws==0.3.1
     # via -r requirements.in
 greenlet==1.1.0
     # via gevent
+hiredis==2.0.0
+    # via aioredis
 itsdangerous==2.0.1
     # via flask
 jinja2==3.0.1
@@ -55,6 +61,8 @@ promise==2.3
     #   graphql-core
     #   graphql-relay
     #   graphql-server-core
+redis==3.5.3
+    # via -r requirements.in
 rx==1.6.1
     # via graphql-core
 six==1.16.0
