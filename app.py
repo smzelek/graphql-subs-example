@@ -20,7 +20,7 @@ CORS(app)
 PORT = int(os.environ.get('SERVER_PORT'))
 
 app.debug = True
-app.add_url_rule('/graphql', view_func=GraphQLView.as_view('graphql', schema=schema, backend=GraphQLCustomCoreBackend(), graphiql=True))
+app.add_url_rule('/graphql', view_func=GraphQLView.as_view('graphql', schema=schema, executor=AsyncioExecutor(loop=asyncio.new_event_loop()), backend=GraphQLCustomCoreBackend(), graphiql=True))
 
 sockets = Sockets(app)
 subscription_server = GeventSubscriptionServer(schema)

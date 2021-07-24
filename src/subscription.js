@@ -5,7 +5,6 @@ import "./subscription.css";
 const SAMPLE_QUERY = gql`
   query SampleQuery {
     sample {
-      result
       serverName
     }
   }
@@ -13,7 +12,7 @@ const SAMPLE_QUERY = gql`
 
 const SAMPLE_SUBSCRIPTION = gql`
   subscription BuildLog {
-    buildLog
+    timeOfDay
   }
 `;
 
@@ -23,8 +22,8 @@ function Subscription({ id }) {
   return (
     <div className="block">
       <h3>Subscription {id} </h3>
-      <p>Server: {subscription.data?.countSeconds?.serverName}</p>
-      <p>Result: {subscription.data?.countSeconds?.time}</p>
+      <p>Server: {subscription.data?.buildLog}</p>
+      <p>Result: {subscription.data?.buildLog}</p>
     </div>
   );
 }

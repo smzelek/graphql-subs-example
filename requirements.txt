@@ -16,11 +16,8 @@ flask==1.1.2
     # via
     #   -r requirements.in
     #   flask-cors
-    #   flask-graphql
     #   flask-sockets
 flask-cors==3.0.10
-    # via -r requirements.in
-flask-graphql==2.0.1
     # via -r requirements.in
 flask-sockets==0.2.1
     # via -r requirements.in
@@ -35,15 +32,11 @@ graphene==2.1.9
     # via -r requirements.in
 graphql-core==2.3.2
     # via
-    #   flask-graphql
     #   graphene
     #   graphql-relay
-    #   graphql-server-core
     #   graphql-ws
 graphql-relay==2.0.1
     # via graphene
-graphql-server-core==1.2.0
-    # via flask-graphql
 graphql-ws==0.3.1
     # via -r requirements.in
 greenlet==1.1.0
@@ -60,11 +53,12 @@ promise==2.3
     # via
     #   graphql-core
     #   graphql-relay
-    #   graphql-server-core
 redis==3.5.3
     # via -r requirements.in
 rx==1.6.1
-    # via graphql-core
+    # via
+    #   -r requirements.in
+    #   graphql-core
 six==1.16.0
     # via
     #   flask-cors
