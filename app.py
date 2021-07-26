@@ -40,8 +40,8 @@ def append(id):
     log += lorem.sentence() + "\n"
 
     syncredis.set(key, log)
-    syncredis.publish(key, 'new data')
-
     print("Appended to build log for job", id)
+    syncredis.publish(key, 'new data')
+    print("Pushed event to channel for job", id)
 
     return "OK"
