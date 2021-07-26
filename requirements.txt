@@ -47,6 +47,8 @@ itsdangerous==2.0.1
     # via flask
 jinja2==3.0.1
     # via flask
+lorem==0.1.1
+    # via -r requirements.in
 markupsafe==2.0.1
     # via jinja2
 promise==2.3

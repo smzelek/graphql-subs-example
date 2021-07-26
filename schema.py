@@ -1,72 +1,42 @@
-from graphene import ObjectType, String, Schema, Field
+from graphene import ObjectType, String, Schema, Field, Int
 import os
 from rx import Observable
-from redisclient import asyncredis
+from redisclient import syncredis
 import asyncio
-from flask import abort
-from datetime import datetime
 
-class SampleQuery(ObjectType):
-    result = String()
+class BuildQuery(ObjectType):
+    job_id = String()
+    build_log = String()
     server_name = String()
 
-    async def resolve_result(self, info):
-        try:
-            [channel] = await asyncio.wait_for(asyncredis.subscribe('job:1'), timeout=5)
-            a = await asyncio.wait_for(channel.get(), timeout=5)
-            return a
-        except asyncio.TimeoutError:
-            abort(500, "Request timed out.")
+    def resolve_build_log(self, info, **args):
+        key = 'job:{id}:log'.format(id=self.job_id)
+        return syncredis.get(key)
 
     def resolve_server_name(self, info):
         return os.environ.get('SERVER_NAME', 'default')
 
 class Query(ObjectType):
-    sample = Field(SampleQuery)
+    build = Field(BuildQuery, job_id=String())
 
-    def resolve_sample(root, info):
-        return SampleQuery()
+    def resolve_build(root, info, **args):
+        return BuildQuery(args.get('job_id'))
+class BuildSubscription(ObjectType):
+    job_id = String()
+    build_log = String()
+    server_name = String()
 
-# class StatefulSecondsCounter(graphene.ObjectType):
-#     server_name = graphene.String()
-#     time = graphene.Int()
+    def resolve_build_log(self, info, **args):
+        key = 'job:{id}:log'.format(id=self.job_id)
+        return syncredis.get(key)
 
-#     def resolve_server_name(self, info):
-#         return os.environ.get('SERVER_NAME', 'default')
+    def resolve_server_name(self, info):
+        return os.environ.get('SERVER_NAME', 'default')
 
-# def from_aiter(iter):
-#     def on_subscribe(observer):
-#         async def _aio_sub():
-#             async for i in iter:
-#                 observer.on_next(i)
-
-#         asyncio.ensure_future(_aio_sub())
-
-#     return Observable.create(on_subscribe)
-
-# async def async_build_log():
-#     # return Observable.interval(1000)\
-#     #                  .take_while(lambda i: i <= 5)
-#     yield 0
-#     for i in range(10):
-#         yield i
-#         await asyncio.sleep(1.)
-#     yield 10
-
-# class Subscription(graphene.ObjectType):
-#     build_log = graphene.Int()
-
-#     # def resolve_build_log(root, info, app_id, job_id):
-#     #     return Observable.just(StatefulSecondsCounter())
-
-#     def resolve_build_log(self, info):
-#         return Observable.just(1)
 class Subscription(ObjectType):
-    time_of_day = String()
+    build = Field(BuildSubscription, job_id=String())
 
-    async def subscribe_time_of_day(root, info):
-        while True:
-            yield datetime.now().isoformat()
-            await asyncio.sleep(1)
+    def resolve_build(self, info, **args):
+        return Observable.interval(1000).map(lambda i: BuildSubscription(args.get('job_id')))
 
 schema = Schema(query=Query,  subscription=Subscription)

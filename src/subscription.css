@@ -2,9 +2,17 @@
 .queries {
     display: flex;
     flex-direction: row;
+    width: 100%;
 }
 .block {
+    flex: 1 1 0px;
     padding: 20px;
     border: 1px solid black;
     margin: 20px
+}
+
+.log {
+    background: black;
+    font-family: 'Courier New', Courier, monospace;
+    color: greenyellow;
 }

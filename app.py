@@ -9,6 +9,7 @@ from schema import schema
 from redisclient import syncredis
 from graphql.execution.executors.asyncio import AsyncioExecutor
 import asyncio
+import lorem
 
 class GraphQLCustomCoreBackend(GraphQLCoreBackend):
     def __init__(self, executor=None):
@@ -20,7 +21,7 @@ CORS(app)
 PORT = int(os.environ.get('SERVER_PORT'))
 
 app.debug = True
-app.add_url_rule('/graphql', view_func=GraphQLView.as_view('graphql', schema=schema, executor=AsyncioExecutor(loop=asyncio.new_event_loop()), backend=GraphQLCustomCoreBackend(), graphiql=True))
+app.add_url_rule('/graphql', view_func=GraphQLView.as_view('graphql', schema=schema, backend=GraphQLCustomCoreBackend(), graphiql=True))
 
 sockets = Sockets(app)
 subscription_server = GeventSubscriptionServer(schema)
@@ -31,8 +32,15 @@ def echo_socket(ws):
     subscription_server.handle(ws)
     return []
 
-@app.route('/increment/<id>')
-def increment(id):
-    print('doing asyncinc')
-    syncredis.publish('job:{id}'.format(id=id), 'Hello World {0}'.format(id))
+@app.route('/append/<id>')
+def append(id):
+    key = 'job:{id}:log'.format(id=id)
+
+    log = syncredis.get(key) or ''
+    log += lorem.sentence() + "\n"
+
+    syncredis.set(key, log)
+
+    print("Appended to build log for job", id)
+
     return "OK"
