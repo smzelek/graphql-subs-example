@@ -2,8 +2,6 @@ import React, { useEffect, useState, useCallback } from "react";
 import { gql, useQuery, useSubscription } from "@apollo/client";
 import "./subscription.css";
 
-const JOB_ID = "4";
-
 const BUILD_LOG_QUERY = gql`
   query BuildLogQuery($jobId: String!) {
     build(jobId: $jobId) {
@@ -22,9 +20,9 @@ const SAMPLE_SUBSCRIPTION = gql`
   }
 `;
 
-function PollingQuery() {
+function PollingQuery({ jobId }) {
   const polling = useQuery(BUILD_LOG_QUERY, {
-    variables: { jobId: JOB_ID },
+    variables: { jobId: jobId },
   });
   const [pollingIn, setPollingIn] = useState(5);
 
@@ -41,6 +39,13 @@ function PollingQuery() {
     return () => clearTimeout(timer);
   }, [polling, pollingIn]);
 
+  useEffect(() => {
+    let logs = document.querySelectorAll('.log')
+    logs.forEach((log) => {
+      log.scrollTop = log.scrollHeight
+    })
+  });
+
   return (
     <div className="block">
       <h3>Polling Query</h3>
@@ -52,25 +57,27 @@ function PollingQuery() {
   );
 }
 
-function Subscription() {
+function Subscription({ jobId }) {
   const subscription = useSubscription(SAMPLE_SUBSCRIPTION, {
-    variables: { jobId: JOB_ID },
+    variables: { jobId: jobId },
   });
   console.log(subscription);
+
+
   return (
     <div className="block">
       <h3>Subscription</h3>
       <p>Server: {subscription.data?.build?.serverName}</p>
-      <p>Polling serverside every second</p>
+      <p>Subscribed to redis event bus serverside</p>
       <p>Result:</p>
       <p className="log">{subscription.data?.build?.buildLog}</p>
     </div>
   );
 }
 
-function AppendToBuildLog() {
+function AppendToBuildLog({ jobId }) {
   const sendRequest = useCallback(async () => {
-    await fetch(`http://localhost:5000/append/${JOB_ID}`);
+    await fetch(`http://localhost:5000/append/${jobId}`);
   }, []);
 
   return (
@@ -82,10 +89,14 @@ function AppendToBuildLog() {
 
 export function Queries() {
   return (
-    <div className="queries">
-      <PollingQuery />
-      <Subscription />
-      <AppendToBuildLog />
+    <div>
+      {["3"].map(jobId => (
+        <div key={jobId} className="queries">
+        <PollingQuery jobId={jobId}/>
+        <Subscription jobId={jobId}/>
+        <AppendToBuildLog jobId={jobId}/>
+      </div>
+      ))}
     </div>
   );
 }

@@ -15,4 +15,6 @@
     background: black;
     font-family: 'Courier New', Courier, monospace;
     color: greenyellow;
+    max-height: 250px;
+    overflow-y: auto;
 }
